@@ -1,89 +1,56 @@
-import React from 'react'
+import React, { useState } from 'react'
+import InputField from './InputField'
+import UserFormValidation from '../hooks/UserFormValidation'
+
+const validators = {
+  name:     (v) => { if (!v.trim()) return 'Name is required.'; if (v.trim().length < 2) return 'Name must be at least 2 characters.'; return null },
+  category: (v) => { if (!v.trim()) return 'Category is required.'; return null },
+  price:    (v) => { if (v === '' || v === undefined) return null; if (isNaN(parseFloat(v)) || parseFloat(v) < 0) return 'Price must be a non-negative number.'; return null },
+  rating:   (v) => { if (v === '' || v === undefined) return null; if (isNaN(parseFloat(v)) || parseFloat(v) < 0 || parseFloat(v) > 10) return 'Rating must be between 0 and 10.'; return null },
+}
 
 export default function ItemForm({ initial, onSave, onCancel }){
-  const [name, setName] = useState(initial?.name || '')
-  const [category, setCategory] = useState(initial?.category || '')
-  const [price, setPrice] = useState(initial?.price ?? '')
-  const [rating, setRating] = useState(initial?.rating ?? '')
-  const [description, setDescription] = useState(initial?.description || '')
-  const [errors, setErrors] = useState({})
+  //validation hook for form state + other handlers
+  const { values, errors, touched, handleChange, handleBlur, validateAll } =
+    UserFormValidation({
+      name:        initial?.name        || '',
+      category:    initial?.category    || '',
+      price:       initial?.price       ?? '',
+      rating:      initial?.rating      ?? '',
+      description: initial?.description || ''
+    }, validators)
 
-  function validate(){
-    const e = {}
-    if (!name.trim()) e.name = 'Name is required.'
-    if (!category.trim()) e.category = 'Category is required.'
-    if (price !== '' && (isNaN(parseFloat(price)) || parseFloat(price) < 0))
-      e.price = 'Price must be a non-negative number.'
-    if (rating !== '' && (isNaN(parseFloat(rating)) || parseFloat(rating) < 0 || parseFloat(rating) > 10))
-      e.rating = 'Rating must be between 0 and 10.'
-    return e
-  }
   function onSubmit(e){
     e.preventDefault()
      /*validate + save */
-    const e2 = validate()
-    if (Object.keys(e2).length) { setErrors(e2); return }
-    setErrors({})
-    onSave({
-      name: name.trim(),
-      category: category.trim(),
-      price: price !== '' ? parseFloat(price) : '',
-      rating: rating !== '' ? parseFloat(rating) : '',
-      description: description.trim()
-    })
+    const e2 = validateAll()
+    if (Object.values(e2).every(v => !v)){
+      onSave({
+        name:        values.name.trim(),
+        category:    values.category.trim(),
+        price:       values.price  !== '' ? parseFloat(values.price)  : '',
+        rating:      values.rating !== '' ? parseFloat(values.rating) : '',
+        description: values.description.trim()
+      })
+    }
   }
   return (
     <form className="row g-3" onSubmit={onSubmit} noValidate>
       {/* TODO: name/title (required) */}
-        <div className="col-12">
-        <label className="form-label">Name <span className="text-danger">*</span></label>
-        <input
-          className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Item name"
-        />
-        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+      <div className="col-12">
+        <InputField label="Name *" value={values.name} onChange={v => handleChange('name', v)} onBlur={() => handleBlur('name')} error={touched.name && errors.name} placeholder="Item name"/>
       </div>
       {/*category (required) */}
-        <div className="col-12">
-        <label className="form-label">Category <span className="text-danger">*</span></label>
-        <input
-          className={`form-control ${errors.category ? 'is-invalid' : ''}`}
-          value={category}
-          onChange={e => setCategory(e.target.value)}
-          placeholder="e.g. Electronics, Books…"
-        />
-        {errors.category && <div className="invalid-feedback">{errors.category}</div>}
+     <div className="col-12">
+        <InputField label="Category *" value={values.category} onChange={v => handleChange('category', v)} onBlur={() => handleBlur('category')} error={touched.category && errors.category} placeholder="e.g. Electronics, Books…"/>
       </div>
       {/*numeric fields like price with validation */}
       <div className="col-md-6">
-        <label className="form-label">Price ($)</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          className={`form-control ${errors.price ? 'is-invalid' : ''}`}
-          value={price}
-          onChange={e => setPrice(e.target.value)}
-          placeholder="0.00"
-        />
-        {errors.price && <div className="invalid-feedback">{errors.price}</div>}
+        <InputField label="Price ($)" type="number" value={values.price} onChange={v => handleChange('price', v)} onBlur={() => handleBlur('price')} error={touched.price && errors.price} placeholder="0.00"/>
       </div>
       {/* numeric fields like Rating with validation*/}
       <div className="col-md-6">
-        <label className="form-label">Rating (0–10)</label>
-        <input
-          type="number"
-          min="0"
-          max="10"
-          step="0.1"
-          className={`form-control ${errors.rating ? 'is-invalid' : ''}`}
-          value={rating}
-          onChange={e => setRating(e.target.value)}
-          placeholder="e.g. 8.5"
-        />
-        {errors.rating && <div className="invalid-feedback">{errors.rating}</div>}
+        <InputField label="Rating (0–10)" type="number" value={values.rating} onChange={v => handleChange('rating', v)} onBlur={() => handleBlur('rating')} error={touched.rating && errors.rating} placeholder="e.g. 8.5"/>
       </div>
       {/*description */}
       <div className="col-12">
@@ -91,8 +58,8 @@ export default function ItemForm({ initial, onSave, onCancel }){
         <textarea
           className="form-control"
           rows={3}
-          value={description}
-          onChange={e => setDescription(e.target.value)}
+          value={values.description}
+          onChange={e => handleChange('description', e.target.value)}
           placeholder="Optional description"
         />
       </div>
