@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
+
 export default function HomeView(){
   return (
     //Home page with intro my app and link to list/create.
