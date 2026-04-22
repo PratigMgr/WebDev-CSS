@@ -1,3 +1,8 @@
+//Name: Pratig Thapa Magar
+//Course Code: INFT 2202
+//Date: 2025-04-20
+//Description: This file defines the ItemsContext and ItemsProvider components.
+//The ItemsContext is a React context that will be used to share the state of the bike items across the application.
 import React, { createContext } from 'react'
 import useItems from '../hooks/useItems'
 
