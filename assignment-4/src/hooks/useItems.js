@@ -1,14 +1,21 @@
+//Name: Pratig Thapa Magar
+//Course Code: INFT 2202
+//Date: 2025-04-20
+//Description: This custom hook manages the state of the bike items, including loading and saving to localStorage, 
+// and providing handlers for adding, updating, deleting, and toggling favourites.
+
 import { useEffect, useMemo, useState } from 'react'
-const STORAGE_KEY = 'a4_items'
+const STORAGE_KEY = 'a4_bikes'
 
 export default function useItems(){
   const [items, setItems] = useState([])
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('')
+  const [bikeType, setBikeType] = useState('')
   const [sortKey, setSortKey] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
   const [minValue, setMinValue] = useState('')
   const [maxValue, setMaxValue] = useState('')
+  const [favOnly, setFavOnly] = useState(false)
 
   // load from localStorage on mount
    useEffect(() => {
@@ -27,7 +34,7 @@ export default function useItems(){
   }, [items])
 
   function addItem(data){
-        const newItem = { ...data, id: Date.now().toString() }
+        const newItem = { ...data, id: Date.now().toString(), favourite: false }
     setItems(prev => [...prev, newItem])
     return newItem
   }
@@ -37,29 +44,30 @@ export default function useItems(){
   function deleteItem(id){ 
         setItems(prev => prev.filter(item => item.id !== id))
   }
-
-  const categories = useMemo(() => {
-    const cats = [...new Set(items.map(i => i.category).filter(Boolean))]
-    return cats.sort()
-  }, [items])
+    function toggleFavourite(id){
+    setItems(prev => prev.map(item => item.id === id ? { ...item, favourite: !item.favourite } : item))
+  }
 
 
   const derived = useMemo(() => {
-      // apply search, category, min/max and sort
+      // apply search, type, min/max and sort
     let result = [...items]
+
+     if (favOnly) {
+      result = result.filter(i => i.favourite)
+    }
 
     // search filter (name + description)
     if (search.trim()) {
       const term = search.trim().toLowerCase()
       result = result.filter(i =>
         (i.name || '').toLowerCase().includes(term) ||
-        (i.description || '').toLowerCase().includes(term)
+        (i.notes || '').toLowerCase().includes(term)
       )
     }
-    
-    // category filter
-    if (category) {
-      result = result.filter(i => i.category === category)
+    // bike type filter
+    if (bikeType) {
+      result = result.filter(i => i.category === bikeType)
     }
     
     // min/max price filter
@@ -86,18 +94,18 @@ export default function useItems(){
     })
 
     return result
-  }, [items, search, category, minValue, maxValue, sortKey, sortDir])
+  }, [items, search, bikeType, minValue, maxValue, sortKey, sortDir, favOnly])
 
   return {
     items, setItems,
     search, setSearch,
-    category, setCategory,
     sortKey, setSortKey,
     sortDir, setSortDir,
     minValue, setMinValue,
     maxValue, setMaxValue,
-    categories: [],
+    favOnly, setFavOnly,
+    bikeType, setBikeType,
     derived,
-    addItem, updateItem, deleteItem
+    addItem, updateItem, deleteItem, toggleFavourite
   }
 }
