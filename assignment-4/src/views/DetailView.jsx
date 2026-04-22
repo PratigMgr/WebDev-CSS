@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ItemsContext } from '../context/ItemsContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function DetailView(){
   const { id } = useParams()
@@ -22,6 +23,7 @@ export default function DetailView(){
       navigate('/list')
     }
   }
+
   return (
     <div>
       <div className="mb-3"><Link className="btn btn-sm btn-outline-secondary" to="/list">← Back to list</Link></div>
