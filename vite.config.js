@@ -6,4 +6,4 @@
 // The base path is set to 'WebDev-CSS-Assignment-4' to ensure that the application works correctly when deployed to a subdirectory.
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-export default defineConfig({ plugins: [react()], base:'WebDev-CSS-Assignment-4' })
+export default defineConfig({ plugins: [react()], base:'/WebDev-CSS' })
