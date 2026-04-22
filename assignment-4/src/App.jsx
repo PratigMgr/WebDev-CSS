@@ -1,3 +1,8 @@
+//Name: Pratig Thapa Magar
+//Course Code: INFT 2202
+//Date: 2025-04-20
+//Description: This is the main App component that sets up the routing for the application. 
+
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './layout/Layout'
